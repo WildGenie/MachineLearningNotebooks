@@ -16,8 +16,7 @@ import os
 import argparse
 
 def run_dask_task(func, **kwargs):
-    task = func(**kwargs)
-    return task
+    return func(**kwargs)
 
 def process_quarter_gpu(client, col_names_path, acq_data_path, year=2000, quarter=1, perf_file=""):
     dask_client = client
@@ -35,14 +34,23 @@ def null_workaround(df, **kwargs):
     for column, data_type in df.dtypes.items():
         if str(data_type) == "category":
             df[column] = df[column].astype('int32').fillna(-1)
-        if str(data_type) in ['int8', 'int16', 'int32', 'int64', 'float32', 'float64']:
+        if str(data_type) in {
+            'int8',
+            'int16',
+            'int32',
+            'int64',
+            'float32',
+            'float64',
+        }:
             df[column] = df[column].fillna(-1)
     return df
 
 def run_gpu_workflow(col_path, acq_path, quarter=1, year=2000, perf_file="", **kwargs):
     names = gpu_load_names(col_path=col_path)
-    acq_gdf = gpu_load_acquisition_csv(acquisition_path= acq_path + "/Acquisition_"
-                                      + str(year) + "Q" + str(quarter) + ".txt")
+    acq_gdf = gpu_load_acquisition_csv(
+        acquisition_path=f"{acq_path}/Acquisition_{str(year)}Q{str(quarter)}.txt"
+    )
+
     acq_gdf = acq_gdf.merge(names, how='left', on=['seller_name'])
     acq_gdf.drop_column('seller_name')
     acq_gdf['seller_name'] = acq_gdf['new']
@@ -72,7 +80,7 @@ def gpu_load_performance_csv(performance_path, **kwargs):
     -------
     GPU DataFrame
     """
-    
+
     cols = [
         "loan_id", "monthly_reporting_period", "servicer", "interest_rate", "current_actual_upb",
         "loan_age", "remaining_months_to_legal_maturity", "adj_remaining_months_to_maturity",
@@ -84,7 +92,7 @@ def gpu_load_performance_csv(performance_path, **kwargs):
         "non_interest_bearing_upb", "principal_forgiveness_upb", "repurchase_make_whole_proceeds_flag",
         "foreclosure_principal_write_off_amount", "servicing_activity_indicator"
     ]
-    
+
     dtypes = OrderedDict([
         ("loan_id", "int64"),
         ("monthly_reporting_period", "date"),
@@ -120,7 +128,7 @@ def gpu_load_performance_csv(performance_path, **kwargs):
     ])
 
     print(performance_path)
-    
+
     return cudf.read_csv(performance_path, names=cols, delimiter='|', dtype=list(dtypes.values()), skiprows=1)
 
 def gpu_load_acquisition_csv(acquisition_path, **kwargs):
@@ -130,7 +138,7 @@ def gpu_load_acquisition_csv(acquisition_path, **kwargs):
     -------
     GPU DataFrame
     """
-    
+
     cols = [
         'loan_id', 'orig_channel', 'seller_name', 'orig_interest_rate', 'orig_upb', 'orig_loan_term', 
         'orig_date', 'first_pay_date', 'orig_ltv', 'orig_cltv', 'num_borrowers', 'dti', 'borrower_credit_score', 
@@ -138,7 +146,7 @@ def gpu_load_acquisition_csv(acquisition_path, **kwargs):
         'zip', 'mortgage_insurance_percent', 'product_type', 'coborrow_credit_score', 'mortgage_insurance_type', 
         'relocation_mortgage_indicator'
     ]
-    
+
     dtypes = OrderedDict([
         ("loan_id", "int64"),
         ("orig_channel", "category"),
@@ -166,9 +174,9 @@ def gpu_load_acquisition_csv(acquisition_path, **kwargs):
         ("mortgage_insurance_type", "float64"),
         ("relocation_mortgage_indicator", "category")
     ])
-    
+
     print(acquisition_path)
-    
+
     return cudf.read_csv(acquisition_path, names=cols, delimiter='|', dtype=list(dtypes.values()), skiprows=1)
 
 def gpu_load_names(col_path):
@@ -182,7 +190,7 @@ def gpu_load_names(col_path):
     cols = [
         'seller_name', 'new'
     ]
-    
+
     dtypes = OrderedDict([
         ("seller_name", "category"),
         ("new", "category"),
@@ -350,14 +358,14 @@ def main():
     print('part_count = {0}'.format(part_count))
     print('end_year = {0}'.format(end_year))
     print('cpu_predictor = {0}'.format(cpu_predictor))
-    
+
     import subprocess
 
     cmd = "hostname --all-ip-addresses"
     process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
     output, error = process.communicate()
     IPADDR = str(output.decode()).split()[0]
-    
+
     cluster = LocalCUDACluster(ip=IPADDR,n_workers=num_gpu)
     client = Client(cluster)
     client
@@ -382,7 +390,7 @@ def main():
     year = start_year
     count = 0
     while year <= end_year:
-        for file in glob(os.path.join(perf_data_path + "/Performance_" + str(year) + "Q" + str(quarter) + "*")):
+        for file in glob(os.path.join(f"{perf_data_path}/Performance_{year}Q{str(quarter)}*")):
             if count < part_count:
                 gpu_dfs.append(process_quarter_gpu(client, col_names_path, acq_data_path, year=year, quarter=quarter, perf_file=file))
                 count += 1
@@ -392,7 +400,7 @@ def main():
         if quarter == 5:
             year += 1
             quarter = 1
-            
+
     wait(gpu_dfs)
     t2 = datetime.datetime.now()
     print("Reading time: {0}".format(str(t2-t1)))
@@ -420,22 +428,22 @@ def main():
         'grow_policy':       'lossguide',
         'verbose':           True
     }
-      
+
     if cpu_predictor:
         print('\n---->>>> Training using CPUs <<<<----\n')
         dxgb_gpu_params['predictor'] = 'cpu_predictor'
         dxgb_gpu_params['tree_method'] = 'hist'
         dxgb_gpu_params['objective'] = 'reg:linear'
-        
+
     else:
         print('\n---->>>> Training using GPUs <<<<----\n')
-    
+
     print('Training parameters are {0}'.format(dxgb_gpu_params))
-    
+
     gpu_dfs = [delayed(DataFrame.from_arrow)(gpu_df) for gpu_df in gpu_dfs[:part_count]]
-    gpu_dfs = [gpu_df for gpu_df in gpu_dfs]
+    gpu_dfs = list(gpu_dfs)
     wait(gpu_dfs)
-    
+
     tmp_map = [(gpu_df, list(client.who_has(gpu_df).values())[0]) for gpu_df in gpu_dfs]
     new_map = {}
     for key, value in tmp_map:
@@ -443,16 +451,16 @@ def main():
             new_map[value] = [key]
         else:
             new_map[value].append(key)
-    
+
     del(tmp_map)
-    gpu_dfs = []
-    for list_delayed in new_map.values():
-        gpu_dfs.append(delayed(cudf.concat)(list_delayed))
-    
+    gpu_dfs = [
+        delayed(cudf.concat)(list_delayed) for list_delayed in new_map.values()
+    ]
+
     del(new_map)
     gpu_dfs = [(gpu_df[['delinquency_12']], gpu_df[delayed(list)(gpu_df.columns.difference(['delinquency_12']))]) for gpu_df in gpu_dfs]
     gpu_dfs = [(gpu_df[0].persist(), gpu_df[1].persist()) for gpu_df in gpu_dfs]
-    
+
     gpu_dfs = [dask.delayed(xgb.DMatrix)(gpu_df[1], gpu_df[0]) for gpu_df in gpu_dfs]
     gpu_dfs = [gpu_df.persist() for gpu_df in gpu_dfs]
     gc.collect()

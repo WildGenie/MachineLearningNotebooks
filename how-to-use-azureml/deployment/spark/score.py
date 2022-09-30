@@ -33,5 +33,4 @@ def run(data):
         return result.collect()[0]['prediction']
     except Exception as e:
         traceback.print_exc()
-        error = str(e)
-        return error
+        return str(e)

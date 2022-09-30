@@ -115,8 +115,7 @@ class UpsampleConvLayer(torch.nn.Module):
 
 
 def load_image(filename):
-    img = Image.open(filename)
-    return img
+    return Image.open(filename)
 
 
 def save_image(filename, data):

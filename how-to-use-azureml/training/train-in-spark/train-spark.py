@@ -24,8 +24,8 @@ spark = pyspark.sql.SparkSession.builder.appName('Iris').getOrCreate()
 
 # print runtime versions
 print('****************')
-print('Python version: {}'.format(sys.version))
-print('Spark version: {}'.format(spark.version))
+print(f'Python version: {sys.version}')
+print(f'Spark version: {spark.version}')
 print('****************')
 
 # load iris.csv into Spark dataframe
@@ -62,12 +62,7 @@ data = data.select(['features', 'label'])
 print("Reading for machine learning")
 data.show(10)
 
-# change regularization rate and you will likely get a different accuracy.
-reg = 0.01
-# load regularization rate from argument if present
-if len(sys.argv) > 1:
-    reg = float(sys.argv[1])
-
+reg = float(sys.argv[1]) if len(sys.argv) > 1 else 0.01
 # log regularization rate
 run.log("Regularization Rate", reg)
 
@@ -90,8 +85,8 @@ accuracy = evaluator.evaluate(prediction)
 
 print()
 print('#####################################')
-print('Regularization rate is {}'.format(reg))
-print("Accuracy is {}".format(accuracy))
+print(f'Regularization rate is {reg}')
+print(f"Accuracy is {accuracy}")
 print('#####################################')
 print()
 

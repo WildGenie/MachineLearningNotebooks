@@ -60,13 +60,11 @@ def align_outputs(
     X_test_full = X_test_full.reset_index().drop(columns="index")
     together = df_fcst.merge(X_test_full, how="right")
 
-    # drop rows where prediction or actuals are nan
-    # happens because of missing actuals
-    # or at edges of time due to lags/rolling windows
-    clean = together[
-        together[[target_column_name, predicted_column_name]].notnull().all(axis=1)
+    return together[
+        together[[target_column_name, predicted_column_name]]
+        .notnull()
+        .all(axis=1)
     ]
-    return clean
 
 
 def do_rolling_forecast_with_lookback(
@@ -326,10 +324,7 @@ _, ext = os.path.splitext(model_path)
 if ext == ".pt":
     # Load the fc-tcn torch model.
     assert _torch_present
-    if torch.cuda.is_available():
-        map_location = map_location_cuda
-    else:
-        map_location = "cpu"
+    map_location = map_location_cuda if torch.cuda.is_available() else "cpu"
     with open(model_path, "rb") as fh:
         fitted_model = torch.load(fh, map_location=map_location)
 else:

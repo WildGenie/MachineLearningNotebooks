@@ -16,7 +16,10 @@ parser.add_argument("--output_transform", type=str, help="transformed taxi data"
 
 args = parser.parse_args()
 
-print("Argument 2(output final transformed taxi data): %s" % args.output_transform)
+print(
+    f"Argument 2(output final transformed taxi data): {args.output_transform}"
+)
+
 
 # These functions transform the renamed data to be used finally for training.
 
@@ -67,8 +70,8 @@ final_df = normalized_df[(normalized_df.distance > 0) & (normalized_df.cost > 0)
 final_df.reset_index(inplace=True, drop=True)
 
 # Writing the final dataframe to use for training in the following steps
-if not (args.output_transform is None):
+if args.output_transform is not None:
     os.makedirs(args.output_transform, exist_ok=True)
-    print("%s created" % args.output_transform)
-    path = args.output_transform + "/processed.parquet"
+    print(f"{args.output_transform} created")
+    path = f"{args.output_transform}/processed.parquet"
     write_df = final_df.to_parquet(path)

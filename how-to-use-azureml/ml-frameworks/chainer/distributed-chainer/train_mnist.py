@@ -65,13 +65,13 @@ def main():
 
     if comm.rank == 0:
         print('==========================================')
-        print('Num process (COMM_WORLD): {}'.format(comm.size))
+        print(f'Num process (COMM_WORLD): {comm.size}')
         if args.gpu:
             print('Using GPUs')
-        print('Using {} communicator'.format(args.communicator))
-        print('Num unit: {}'.format(args.unit))
-        print('Num Minibatch-size: {}'.format(args.batchsize))
-        print('Num epoch: {}'.format(args.epoch))
+        print(f'Using {args.communicator} communicator')
+        print(f'Num unit: {args.unit}')
+        print(f'Num Minibatch-size: {args.batchsize}')
+        print(f'Num epoch: {args.epoch}')
         print('==========================================')
 
     model = L.Classifier(MLP(args.unit, 10))
@@ -86,10 +86,7 @@ def main():
 
     # Split and distribute the dataset. Only worker 0 loads the whole dataset.
     # Datasets of worker 0 are evenly split and distributed to all workers.
-    if comm.rank == 0:
-        train, test = chainer.datasets.get_mnist()
-    else:
-        train, test = None, None
+    train, test = chainer.datasets.get_mnist() if comm.rank == 0 else (None, None)
     train = chainermn.scatter_dataset(train, comm, shuffle=True)
     test = chainermn.scatter_dataset(test, comm, shuffle=True)
 

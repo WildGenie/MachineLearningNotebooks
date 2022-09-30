@@ -26,7 +26,7 @@ def init():
 
 def run(input_data):
     logger = EntryScript().logger
-    logger.info("run() is called with: {}.".format(input_data))
+    logger.info(f"run() is called with: {input_data}.")
 
     # make inference
     num_rows, num_cols = input_data.shape

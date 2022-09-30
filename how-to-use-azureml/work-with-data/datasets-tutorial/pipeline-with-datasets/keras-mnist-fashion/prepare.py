@@ -3,23 +3,21 @@ import sys
 
 
 def convert(imgf, labelf, outf, n):
-    f = open(imgf, "rb")
-    temp = open(labelf, "rb")
-    o = open(outf, "w")
+    with open(imgf, "rb") as f:
+        temp = open(labelf, "rb")
+        o = open(outf, "w")
 
-    f.read(16)
-    temp.read(8)
-    images = []
+        f.read(16)
+        temp.read(8)
+        images = []
 
-    for i in range(n):
-        image = [ord(temp.read(1))]
-        for j in range(28 * 28):
-            image.append(ord(f.read(1)))
-        images.append(image)
+        for _ in range(n):
+            image = [ord(temp.read(1))]
+            image.extend(ord(f.read(1)) for _ in range(28 * 28))
+            images.append(image)
 
-    for image in images:
-        o.write(",".join(str(pix) for pix in image) + "\n")
-    f.close()
+        for image in images:
+            o.write(",".join(str(pix) for pix in image) + "\n")
     o.close()
     temp.close()
 

@@ -103,7 +103,7 @@ if __name__ == "__main__":
     artifacts_path = run.input_datasets['artifacts_path']
 
     # Find checkpoint file to be evaluated
-    checkpoint_id = '-' + str(args.checkpoint_number)
+    checkpoint_id = f'-{str(args.checkpoint_number)}'
     checkpoint_files = list(filter(
         lambda filename: filename.endswith(checkpoint_id),
         artifacts_dataset.to_path()))

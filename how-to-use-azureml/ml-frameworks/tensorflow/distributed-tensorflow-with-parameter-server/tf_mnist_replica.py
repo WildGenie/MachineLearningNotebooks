@@ -93,7 +93,7 @@ def main(unused_argv):
     if FLAGS.download_only:
         sys.exit(0)
 
-    print("job name = %s" % job_name)
+    print(f"job name = {job_name}")
     print("task index = %d" % task_index)
     print("number of GPUs = %d" % FLAGS.num_gpus)
 
@@ -124,10 +124,10 @@ def main(unused_argv):
     # parameter servers (ps). The non-Variable ops will be placed on the workers.
     # The ps use CPU and workers use corresponding GPU
     with tf.device(
-        tf.train.replica_device_setter(
-            worker_device=worker_device,
-            ps_device="/job:ps/cpu:0",
-            cluster=cluster)):
+            tf.train.replica_device_setter(
+                worker_device=worker_device,
+                ps_device="/job:ps/cpu:0",
+                cluster=cluster)):
         global_step = tf.Variable(0, name="global_step", trainable=False)
 
         # Variables of the hidden layer
@@ -173,10 +173,7 @@ def main(unused_argv):
         train_step = opt.minimize(cross_entropy, global_step=global_step)
 
         if FLAGS.sync_replicas:
-            local_init_op = opt.local_step_init_op
-            if is_chief:
-                local_init_op = opt.chief_init_op
-
+            local_init_op = opt.chief_init_op if is_chief else opt.local_step_init_op
             ready_for_local_init_op = opt.ready_for_local_init_op
 
             # Initial token and chief queue runners required by the sync_replicas mode
@@ -218,8 +215,8 @@ def main(unused_argv):
                   task_index)
 
         if FLAGS.existing_servers:
-            server_grpc_url = "grpc://" + task_index
-            print("Using existing server at: %s" % server_grpc_url)
+            server_grpc_url = f"grpc://{task_index}"
+            print(f"Using existing server at: {server_grpc_url}")
 
             sess = sv.prepare_or_wait_for_session(server_grpc_url, config=sess_config)
         else:

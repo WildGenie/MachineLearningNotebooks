@@ -6,6 +6,7 @@
 # ======================================
 """Basic word2vec example."""
 
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -34,7 +35,7 @@ parser.add_argument('--input_data', type=str, help='training data')
 args = parser.parse_args()
 
 input_data = args.input_data
-print("the input data is at %s" % input_data)
+print(f"the input data is at {input_data}")
 
 # Step 1: Read data.
 filename = input_data
@@ -59,10 +60,10 @@ def build_dataset(words, n_words):
     """Process raw inputs into a dataset."""
     count = [['UNK', -1]]
     count.extend(collections.Counter(words).most_common(n_words - 1))
-    dictionary = dict()
+    dictionary = {}
     for word, _ in count:
         dictionary[word] = len(dictionary)
-    data = list()
+    data = []
     unk_count = 0
     for word in words:
         if word in dictionary:
@@ -227,12 +228,12 @@ with tf.Session(graph=graph, config=config) as session:
     # Evaluate similarity in the end on worker 0.
     if hvd.rank() == 0:
         sim = similarity.eval()
+        top_k = 8  # number of nearest neighbors
         for i in xrange(valid_size):
             valid_word = reverse_dictionary[valid_examples[i]]
-            top_k = 8  # number of nearest neighbors
             nearest = (-sim[i, :]).argsort()[1:top_k + 1]
-            log_str = 'Nearest to %s:' % valid_word
+            log_str = f'Nearest to {valid_word}:'
             for k in xrange(top_k):
                 close_word = reverse_dictionary[nearest[k]]
-                log_str = '%s %s,' % (log_str, close_word)
+                log_str = f'{log_str} {close_word},'
             print(log_str)

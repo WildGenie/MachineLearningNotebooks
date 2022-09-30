@@ -51,6 +51,6 @@ for alpha in alphas:
 
     model_file_name = 'ridge_{0:.2f}.pkl'.format(alpha)
     with open(model_file_name, "wb") as file:
-        joblib.dump(value=reg, filename='outputs/' + model_file_name)
+        joblib.dump(value=reg, filename=f'outputs/{model_file_name}')
 
     print('alpha is {0:.2f}, and mse is {1:0.2f}'.format(alpha, mse))

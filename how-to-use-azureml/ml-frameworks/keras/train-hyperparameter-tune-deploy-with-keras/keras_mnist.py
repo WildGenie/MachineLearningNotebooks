@@ -105,7 +105,7 @@ run.log('Final test accuracy', score[1])
 print('Test accuracy:', score[1])
 
 plt.figure(figsize=(6, 3))
-plt.title('MNIST with Keras MLP ({} epochs)'.format(n_epochs), fontsize=14)
+plt.title(f'MNIST with Keras MLP ({n_epochs} epochs)', fontsize=14)
 plt.plot(history.history['val_accuracy'], 'b-', label='Accuracy', lw=4, alpha=0.5)
 plt.plot(history.history['val_loss'], 'r--', label='Loss', lw=4, alpha=0.5)
 plt.legend(fontsize=12)

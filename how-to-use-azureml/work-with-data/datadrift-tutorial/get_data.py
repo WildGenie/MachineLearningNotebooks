@@ -24,7 +24,7 @@ for year in target_years:
             isd = NoaaIsdWeather(start, end).to_pandas_dataframe()
             isd = isd[isd['stationName'].str.contains('FLORIDA', regex=True, na=False)]
             os.makedirs(path, exist_ok=True)
-            isd.to_parquet(path + 'data.parquet')
+            isd.to_parquet(f'{path}data.parquet')
         except Exception as e:
-            print('Month {} in year {} likely has no data.\n'.format(month, year))
-            print('Exception: {}'.format(e))
+            print(f'Month {month} in year {year} likely has no data.\n')
+            print(f'Exception: {e}')

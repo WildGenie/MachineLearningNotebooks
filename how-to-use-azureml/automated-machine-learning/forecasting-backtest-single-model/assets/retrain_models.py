@@ -81,7 +81,6 @@ def run_backtest(data_input_name: str, file_name: str, experiment: Experiment):
         X_train = data_input.iloc[: -automl_settings["max_horizon"]]
         y_train = X_train.pop(target_column_name).values
         X_test = data_input.iloc[-automl_settings["max_horizon"] :]
-        y_test = X_test.pop(target_column_name).values
     else:
         # The data contain grains.
         dfs_train = []
@@ -97,8 +96,7 @@ def run_backtest(data_input_name: str, file_name: str, experiment: Experiment):
         X_train = pd.concat(dfs_train, sort=False, ignore_index=True)
         y_train = X_train.pop(target_column_name).values
         X_test = pd.concat(dfs_test, sort=False, ignore_index=True)
-        y_test = X_test.pop(target_column_name).values
-
+    y_test = X_test.pop(target_column_name).values
     last_training_date = str(
         X_train[automl_settings[constants.TimeSeries.TIME_COLUMN_NAME]].max()
     )
@@ -159,15 +157,16 @@ def run(input_files):
             for one_mod in models:
                 if cloud_model is None or one_mod.version > cloud_model.version:
                     logger.info(
-                        "Using existing model from the workspace. Model version: {}".format(
-                            one_mod.version
-                        )
+                        f"Using existing model from the workspace. Model version: {one_mod.version}"
                     )
+
                     cloud_model = one_mod
         file_name = cloud_model.download(exist_ok=True)
 
-    forecasts = []
     logger.info("Running backtest.")
-    for input_file in input_files:
-        forecasts.append(run_backtest(input_file, file_name, get_run().experiment))
+    forecasts = [
+        run_backtest(input_file, file_name, get_run().experiment)
+        for input_file in input_files
+    ]
+
     return pd.concat(forecasts)

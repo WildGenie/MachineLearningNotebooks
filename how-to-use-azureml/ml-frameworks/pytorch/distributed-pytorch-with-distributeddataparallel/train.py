@@ -83,8 +83,8 @@ def evaluate(test_loader, model, device):
 
     correct = 0
     total = 0
-    class_correct = list(0.0 for i in range(10))
-    class_total = list(0.0 for i in range(10))
+    class_correct = [0.0 for _ in range(10)]
+    class_total = [0.0 for _ in range(10)]
     with torch.no_grad():
         for data in test_loader:
             images, labels = data[0].to(device), data[1].to(device)

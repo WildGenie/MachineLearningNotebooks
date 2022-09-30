@@ -4,6 +4,7 @@ on the model.pkl file which is uploaded along with this script to the
 compute instance.
 """
 
+
 import argparse
 from azureml.core import Dataset, Run
 from azureml.automl.core.shared.constants import TimeSeriesInternal
@@ -50,8 +51,9 @@ PI = "prediction_interval"
 fitted_model.quantiles = quantiles
 pred_quantiles = fitted_model.forecast_quantiles(X_test)
 pred_quantiles[PI] = pred_quantiles[[min(quantiles), max(quantiles)]].apply(
-    lambda x: "[{}, {}]".format(x[0], x[1]), axis=1
+    lambda x: f"[{x[0]}, {x[1]}]", axis=1
 )
+
 X_test[target_column_name] = y_test_df[target_column_name]
 X_test[PI] = pred_quantiles[PI]
 X_test[predicted_column_name] = pred_quantiles[0.5]

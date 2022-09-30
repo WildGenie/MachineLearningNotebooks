@@ -27,7 +27,7 @@ try:
     from urllib import urlretrieve
 except ImportError:
     from urllib.request import urlretrieve
-zipfilename = outdirname + '.zip'
+zipfilename = f'{outdirname}.zip'
 urlretrieve('https://publictestdatasets.blob.core.windows.net/data/' + zipfilename, zipfilename)
 with zipfile.ZipFile(zipfilename, 'r') as unzip:
     unzip.extractall('.')

@@ -24,9 +24,7 @@ def init():
 def is_multi_dimensional(matrix):
     if hasattr(matrix, "ndim") and matrix.ndim > 1:
         return True
-    if hasattr(matrix, "shape") and matrix.shape[1]:
-        return True
-    return False
+    return bool(hasattr(matrix, "shape") and matrix.shape[1])
 
 
 def convert_matrix(matrix):

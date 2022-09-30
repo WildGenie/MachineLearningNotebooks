@@ -16,12 +16,12 @@ parser.add_argument("--output_product", type=str, help="output_product directory
 
 args = parser.parse_args()
 
-print("Argument 1: %s" % args.arg_num1)
-print("Argument 2: %s" % args.arg_num2)
-print("Argument 3: %s" % args.file_num1)
-print("Argument 4: %s" % args.file_num2)
-print("Argument 5: %s" % args.output_sum)
-print("Argument 6: %s" % args.output_product)
+print(f"Argument 1: {args.arg_num1}")
+print(f"Argument 2: {args.arg_num2}")
+print(f"Argument 3: {args.file_num1}")
+print(f"Argument 4: {args.file_num2}")
+print(f"Argument 5: {args.output_sum}")
+print(f"Argument 6: {args.output_product}")
 
 
 def get_number_from_file(file_path):
@@ -35,23 +35,18 @@ def get_num(arg_num, file_num):
     if arg_num is None and not file_num:
         return 0
     else:
-        num = arg_num if arg_num is not None else get_number_from_file(file_num)
-        return num
+        return arg_num if arg_num is not None else get_number_from_file(file_num)
 
 
 def write_num_to_file(num, file_path):
-    if file_path is not None and file_path != '':
-        output_dir = file_path
-    else:
-        output_dir = '.'
+    output_dir = file_path if file_path is not None and file_path != '' else '.'
     filename = output_dir
 
-    if output_dir != '.' and not os.path.exists(os.path.dirname(filename)):
+    if filename != '.' and not os.path.exists(os.path.dirname(filename)):
         os.makedirs(os.path.dirname(filename))
 
-    fo = open(filename, 'w+')
-    fo.write(str(num))
-    fo.close()
+    with open(filename, 'w+') as fo:
+        fo.write(str(num))
 
 
 num1 = get_num(args.arg_num1, args.file_num1)

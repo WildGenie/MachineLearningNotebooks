@@ -52,10 +52,7 @@ def get_model(model_path, model_file_name):
     if model_file_name.endswith("pt"):
         # Load the fc-tcn torch model.
         assert _torch_present, "Loading DNN models needs torch to be presented."
-        if torch.cuda.is_available():
-            map_location = map_location_cuda
-        else:
-            map_location = "cpu"
+        map_location = map_location_cuda if torch.cuda.is_available() else "cpu"
         with open(model_full_path, "rb") as fh:
             fitted_model = torch.load(fh, map_location=map_location)
     else:
@@ -97,8 +94,7 @@ def get_args():
         default="results",
         help="The output path",
     )
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def get_data(run, fitted_model, target_column_name, test_dataset_name):
@@ -118,11 +114,12 @@ def get_model_filename(run, model_name, model_path):
     model = Model(run.experiment.workspace, model_name)
     if "model_file_name" in model.tags:
         return model.tags["model_file_name"]
-    is_pkl = True
-    if model.tags.get("algorithm") == "TCNForecaster" or os.path.exists(
+    is_pkl = model.tags.get(
+        "algorithm"
+    ) != "TCNForecaster" and not os.path.exists(
         os.path.join(model_path, "model.pt")
-    ):
-        is_pkl = False
+    )
+
     return "model.pkl" if is_pkl else "model.pt"
 
 

@@ -13,10 +13,15 @@ args = parser.parse_args()
 os.makedirs(args.output_audio, exist_ok=True)
 os.makedirs(args.output_images, exist_ok=True)
 
-subprocess.run("ffmpeg -i {} {}/video.aac".format(args.input_video, args.output_audio),
-               shell=True,
-               check=True)
+subprocess.run(
+    f"ffmpeg -i {args.input_video} {args.output_audio}/video.aac",
+    shell=True,
+    check=True,
+)
 
-subprocess.run("ffmpeg -i {} {}/%05d_video.jpg -hide_banner".format(args.input_video, args.output_images),
-               shell=True,
-               check=True)
+
+subprocess.run(
+    f"ffmpeg -i {args.input_video} {args.output_images}/%05d_video.jpg -hide_banner",
+    shell=True,
+    check=True,
+)

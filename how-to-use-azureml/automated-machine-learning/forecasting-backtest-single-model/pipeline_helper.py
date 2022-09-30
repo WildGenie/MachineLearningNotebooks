@@ -119,7 +119,7 @@ def get_backtest_pipeline(
     utilities.set_environment_variables_for_run(back_test_config)
     forecasts = PipelineData(name="forecasts", datastore=None)
     if model_name:
-        parallel_step_name = "{}-backtest".format(model_name.replace("_", "-"))
+        parallel_step_name = f'{model_name.replace("_", "-")}-backtest'
     else:
         parallel_step_name = "AutoML-backtest"
 

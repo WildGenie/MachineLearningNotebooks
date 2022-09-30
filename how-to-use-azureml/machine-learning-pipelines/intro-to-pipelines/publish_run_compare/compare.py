@@ -14,14 +14,14 @@ parser.add_argument("--pipeline_param", type=int, help="pipeline parameter")
 
 args = parser.parse_args()
 
-print("Argument 1: %s" % args.compare_data1)
-print("Argument 2: %s" % args.compare_data2)
-print("Argument 3: %s" % args.output_compare)
-print("Argument 4: %s" % args.pipeline_param)
+print(f"Argument 1: {args.compare_data1}")
+print(f"Argument 2: {args.compare_data2}")
+print(f"Argument 3: {args.output_compare}")
+print(f"Argument 4: {args.pipeline_param}")
 
-if not (args.output_compare is None):
+if args.output_compare is not None:
     os.makedirs(args.output_compare, exist_ok=True)
-    print("%s created" % args.output_compare)
+    print(f"{args.output_compare} created")
 
 with open(os.path.join(args.output_compare, 'compare.txt'), 'w') as fw:
     fw.write('here is the compare result')

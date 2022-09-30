@@ -52,8 +52,7 @@ class RLlibMultiAgentParticleEnv(rllib.MultiAgentEnv):
         self.action_space_dict = self._make_dict(self._env.action_space)
 
     def reset(self):
-        obs_dict = self._make_dict(self._env.reset())
-        return obs_dict
+        return self._make_dict(self._env.reset())
 
     def step(self, action_dict):
         actions = list(action_dict.values())
@@ -77,9 +76,7 @@ class RLlibMultiAgentParticleEnv(rllib.MultiAgentEnv):
 
 def _video_callable(video_frequency):
     def should_record_video(episode_id):
-        if episode_id % video_frequency == 0:
-            return True
-        return False
+        return episode_id % video_frequency == 0
 
     return should_record_video
 
@@ -87,10 +84,10 @@ def _video_callable(video_frequency):
 def _make_env(scenario_name, horizon, monitor_enabled, video_frequency):
     if scenario_name in CUSTOM_SCENARIOS:
         # Scenario file must exist locally
-        file_path = os.path.join(os.path.dirname(__file__), scenario_name + '.py')
+        file_path = os.path.join(os.path.dirname(__file__), f'{scenario_name}.py')
         scenario = imp.load_source('', file_path).Scenario()
     else:
-        scenario = scenarios.load(scenario_name + '.py').Scenario()
+        scenario = scenarios.load(f'{scenario_name}.py').Scenario()
 
     world = scenario.make_world()
 
@@ -99,10 +96,16 @@ def _make_env(scenario_name, horizon, monitor_enabled, video_frequency):
 
     env = ParticleEnvRenderWrapper(env, horizon)
 
-    if not monitor_enabled:
-        return env
-
-    return wrappers.Monitor(env, './logs/videos', resume=True, video_callable=_video_callable(video_frequency))
+    return (
+        wrappers.Monitor(
+            env,
+            './logs/videos',
+            resume=True,
+            video_callable=_video_callable(video_frequency),
+        )
+        if monitor_enabled
+        else env
+    )
 
 
 def env_creator(config):

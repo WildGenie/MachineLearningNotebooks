@@ -9,7 +9,7 @@ def run_rolling_forecast(
     target_column_name,
     inference_folder="./forecast",
 ):
-    train_run.download_file("outputs/model.pkl", inference_folder + "/model.pkl")
+    train_run.download_file("outputs/model.pkl", f"{inference_folder}/model.pkl")
 
     inference_env = train_run.get_environment()
 

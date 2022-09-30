@@ -20,7 +20,7 @@ class SwitchWorld(World):
         super().step()
 
         # if all hills are activated, reset the switches and hills
-        if all([hill.active for hill in self.hills]):
+        if all(hill.active for hill in self.hills):
             self.reset_hills()
             self.reset_switches()
         else:
@@ -53,8 +53,6 @@ class SwitchWorld(World):
 class Scenario(BaseScenario):
     def make_world(self):
 
-        # main configurations
-        num_agents = 2
         num_hills = 2
         num_switches = 1
         self.max_episode_length = 100
@@ -78,7 +76,7 @@ class Scenario(BaseScenario):
         world.collaborative = True
 
         # add agents
-        world.agents = [Agent() for i in range(num_agents)]
+        world.agents = [Agent() for _ in range(2)]
         for i, agent in enumerate(world.agents):
             agent.name = 'agent %d' % i
             agent.collide = True
@@ -111,12 +109,12 @@ class Scenario(BaseScenario):
         delta_pos = agent1.state.p_pos - agent2.state.p_pos
         dist = np.sqrt(np.sum(np.square(delta_pos)))
         dist_min = agent1.size + agent2.size
-        return True if dist < dist_min else False
+        return dist < dist_min
 
     def reward(self, agent, world):
         # Agents are rewarded based on number of landmarks activated
         rew = 0
-        if all([h.active for h in world.hills]):
+        if all(h.active for h in world.hills):
             rew += 100
         else:
             # give bonus each time a hill is activated
@@ -137,13 +135,12 @@ class Scenario(BaseScenario):
 
     def observation(self, agent, world):
         # get positions of all entities in this agent's reference frame
-        entity_pos = []
-        for entity in world.landmarks:  # world.entities:
-            entity_pos.append(entity.state.p_pos - agent.state.p_pos)
+        entity_pos = [
+            entity.state.p_pos - agent.state.p_pos for entity in world.landmarks
+        ]
+
         # entity colors
-        entity_color = []
-        for entity in world.landmarks:  # world.entities:
-            entity_color.append(entity.color)
+        entity_color = [entity.color for entity in world.landmarks]
         # communication of all other agents
         comm = []
         other_pos = []
@@ -209,7 +206,9 @@ class Hill(Landmark):
         if (not self.active):
 
             # Check if an agent is on the hill and all switches are active
-            if (self._is_occupied(world.agents)) and all([switch.active for switch in world.switches]):
+            if (self._is_occupied(world.agents)) and all(
+                switch.active for switch in world.switches
+            ):
                 self.capture_timer += 1
 
                 # activate hill (this is irreversible)
@@ -217,7 +216,6 @@ class Hill(Landmark):
                     self.activate()
                     self.activated_just_now = True
 
-            # Reset capture timer if hill is not occupied
             else:
                 self.capture_timer = 0
 
@@ -308,16 +306,21 @@ class SwitchExpertPolicy():
         # select a target!
         if self.expert_type == 'switch':
             # if agent is not already on a switch, choose target switch
-            if not any([switch._is_occupied([self.agent]) for switch in self.world.switches]):
+            if not any(
+                switch._is_occupied([self.agent]) for switch in self.world.switches
+            ):
                 # select a target switch if there's an inactive one
                 inactive_switches = [switch for switch in self.world.switches if not switch.active]
-                if len(inactive_switches) > 0 and (self.target_switch not in inactive_switches):
+                if (
+                    inactive_switches
+                    and self.target_switch not in inactive_switches
+                ):
                     self.target_switch = random.choice(inactive_switches)
             target = self.target_switch.state.p_pos
         elif self.expert_type == 'hill':
             # select a target hill if we haven't done so yet, or the current target switch is inactive
             inactive_hills = [hill for hill in self.world.hills if not hill.active]
-            if len(inactive_hills) > 0 and (self.target_hill not in inactive_hills):
+            if inactive_hills and self.target_hill not in inactive_hills:
                 self.target_hill = random.choice(inactive_hills)
             target = self.target_hill.state.p_pos
 
@@ -340,11 +343,10 @@ class SwitchExpertPolicy():
         else:
             u = np.zeros(5)
             if (impulse[0] == impulse[1] == 0) \
-                or (self.step_count < self.burn_in) \
-                    or (self.burn_step != 0 and self.step_count % self.burn_step != 0):
+                    or (self.step_count < self.burn_in) \
+                        or (self.burn_step != 0 and self.step_count % self.burn_step != 0):
                 u[0] = 0.1
             else:
-                pass
                 # u: noop (?), right, left, down, up
                 if impulse[0] > 0:  # x-direction (- left/right + )
                     u[1] = impulse[0]  # right

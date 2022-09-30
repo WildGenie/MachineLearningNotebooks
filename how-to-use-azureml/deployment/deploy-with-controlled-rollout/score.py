@@ -24,5 +24,4 @@ def run(raw_data):
         # you can return any data type as long as it is JSON-serializable
         return result.tolist()
     except Exception as e:
-        error = str(e)
-        return error
+        return str(e)

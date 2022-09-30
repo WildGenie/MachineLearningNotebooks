@@ -136,8 +136,7 @@ def calculate_scores_and_build_plots(
         file_path = os.path.join(input_dir, fle)
         if os.path.isfile(file_path) and file_path.endswith(".csv"):
             df_iter = pd.read_csv(file_path, parse_dates=[time_column_name])
-            for _, iteration in df_iter.groupby(BACKTEST_ITER):
-                dfs.append(iteration)
+            dfs.extend(iteration for _, iteration in df_iter.groupby(BACKTEST_ITER))
     forecast_df = pd.concat(dfs, sort=False, ignore_index=True)
     # To make sure plots are in order, sort the predictions by grain and iteration.
     ts_index = grains + [BACKTEST_ITER]

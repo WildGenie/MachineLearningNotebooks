@@ -14,12 +14,12 @@ parser.add_argument("--output_train", type=str, help="output_train directory")
 
 args = parser.parse_args()
 
-print("Argument 1: %s" % args.input_data)
-print("Argument 2: %s" % args.output_train)
+print(f"Argument 1: {args.input_data}")
+print(f"Argument 2: {args.output_train}")
 
-if not (args.output_train is None):
+if args.output_train is not None:
     os.makedirs(args.output_train, exist_ok=True)
-    print("%s created" % args.output_train)
+    print(f"{args.output_train} created")
 
 with open(os.path.join(args.input_data), 'rb') as f:
     content = f.read()

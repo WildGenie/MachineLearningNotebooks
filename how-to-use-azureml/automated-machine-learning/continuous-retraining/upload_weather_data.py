@@ -101,7 +101,7 @@ parser = argparse.ArgumentParser("split")
 parser.add_argument("--ds_name", help="name of the Dataset to update")
 args = parser.parse_args()
 
-print("Argument 1(ds_name): %s" % args.ds_name)
+print(f"Argument 1(ds_name): {args.ds_name}")
 
 dstor = ws.get_default_datastore()
 register_dataset = False
@@ -155,7 +155,8 @@ else:
 
 if register_dataset:
     ds = Dataset.Tabular.from_delimited_files(
-        dstor.path("{}/**/*.csv".format(args.ds_name)),
+        dstor.path(f"{args.ds_name}/**/*.csv"),
         partition_format="/{partition_date:yyyy/MM/dd/HH/mm/ss}/data.csv",
     )
+
     ds.register(ws, name=args.ds_name)

@@ -31,7 +31,7 @@ input_dataset = script_run.input_datasets["training_data"]
 X_train = input_dataset.to_pandas_dataframe()
 # Split the data.
 for i in range(step_number):
-    file_name = os.path.join(working_dir, "backtest_{}.csv".format(i))
+    file_name = os.path.join(working_dir, f"backtest_{i}.csv")
     if parsed_args.time_series_id_column_names:
         dfs = []
         for _, one_series in X_train.groupby([parsed_args.time_series_id_column_names]):

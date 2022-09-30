@@ -23,8 +23,8 @@ parser.add_argument("--model_name", help="name of the deployed model")
 
 args = parser.parse_args()
 
-print("Argument 1(ds_name): %s" % args.ds_name)
-print("Argument 2(model_name): %s" % args.model_name)
+print(f"Argument 1(ds_name): {args.ds_name}")
+print(f"Argument 2(model_name): {args.model_name}")
 
 # Get the latest registered model
 try:

@@ -15,10 +15,8 @@ def adf_test(series, **kw):
     :param series: series to test
     :return: dictionary of results
     """
-    if "lags" in kw.keys():
-        msg = "Lag order of {} detected. Running the ADF test...".format(
-            str(kw["lags"])
-        )
+    if "lags" in kw:
+        msg = f'Lag order of {str(kw["lags"])} detected. Running the ADF test...'
         print(msg)
         statistic, pval, critval, resstore = stattools.adfuller(
             series, maxlag=kw["lags"], autolag=kw["autolag"], store=kw["store"]
@@ -28,13 +26,12 @@ def adf_test(series, **kw):
             series, autolag=kw["IC"], store=kw["store"]
         )
 
-    output = {
+    return {
         "statistic": statistic,
         "pval": pval,
         "critical": critval,
         "resstore": resstore,
     }
-    return output
 
 
 def kpss_test(series, **kw):
@@ -60,7 +57,7 @@ def kpss_test(series, **kw):
     }
 
     if kw["store"]:
-        output.update({"resstore": rstore})
+        output["resstore"] = rstore
     return output
 
 
@@ -112,7 +109,7 @@ def format_test_output(test_name, test_res, H0_unit_root=True):
         H0 = "The process is stationary"
         stationary = "yes" if p_val > 0.05 else "not"
 
-    out = {
+    return {
         "test_name": test_name,
         "statistic": statistic,
         "crit_val": crit_val,
@@ -121,7 +118,6 @@ def format_test_output(test_name, test_res, H0_unit_root=True):
         "stationary": stationary,
         "Null Hypothesis": H0,
     }
-    return out
 
 
 def unit_root_test_wrapper(series, lags=None):
@@ -146,8 +142,8 @@ def unit_root_test_wrapper(series, lags=None):
 
     arch_test_settings = {}  # settings for PP, ADF GLS and ZA tests
     if lags is not None:
-        adf_settings.update({"lags": lags, "autolag": None})
-        kpss_settings.update({"lags:": lags})
+        adf_settings |= {"lags": lags, "autolag": None}
+        kpss_settings["lags:"] = lags
         arch_test_settings = {"lags": lags}
     # Run individual tests
     adf = adf_test(series, **adf_settings)  # ADF test
@@ -187,8 +183,7 @@ def unit_root_test_wrapper(series, lags=None):
     # Majority rule. If the ratio is exactly 0.5, assume the series in non-stationary.
     stationary = "YES" if (ratio > 0.5) else "NO"
 
-    out = {"summary": test_sum, "stationary": stationary}
-    return out
+    return {"summary": test_sum, "stationary": stationary}
 
 
 def ts_train_test_split(df_input, n, time_colname, ts_id_colnames=None):
@@ -243,7 +238,7 @@ def compute_metrics(fcst_df, metric_name=None, ts_id_colnames=None):
                 metrics=list(constants.Metric.SCALAR_REGRESSION_SET),
             )
         except BaseException:
-            msg = "{}: metrics calculation failed.".format(grain)
+            msg = f"{grain}: metrics calculation failed."
             print(msg)
             scores = {}
         one_grain_metrics_df = pd.DataFrame(

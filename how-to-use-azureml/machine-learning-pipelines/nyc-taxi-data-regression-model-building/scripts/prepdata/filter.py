@@ -18,7 +18,7 @@ parser.add_argument("--output_filter", type=str, help="filter out out of city lo
 
 args = parser.parse_args()
 
-print("Argument (output filtered taxi data path): %s" % args.output_filter)
+print(f"Argument (output filtered taxi data path): {args.output_filter}")
 
 # These functions filter out coordinates for locations that are outside the city border.
 
@@ -40,8 +40,8 @@ latlong_filtered_df = combined_df[(combined_df.pickup_longitude <= -73.72)
 
 latlong_filtered_df.reset_index(inplace=True, drop=True)
 
-if not (args.output_filter is None):
+if args.output_filter is not None:
     os.makedirs(args.output_filter, exist_ok=True)
-    print("%s created" % args.output_filter)
-    path = args.output_filter + "/processed.parquet"
+    print(f"{args.output_filter} created")
+    path = f"{args.output_filter}/processed.parquet"
     write_df = latlong_filtered_df.to_parquet(path)
