@@ -19,12 +19,11 @@ def check_port_in_port_range(expected_port: str,
        int(dest_ports[0]) == int(expected_port):
         return True
 
-    if len(dest_ports) == 2 and \
-       int(dest_ports[0]) <= int(expected_port) and \
-       int(dest_ports[1]) >= int(expected_port):
-        return True
-
-    return False
+    return (
+        len(dest_ports) == 2
+        and int(dest_ports[0]) <= int(expected_port)
+        and int(dest_ports[1]) >= int(expected_port)
+    )
 
 
 def check_port_in_destination_port_ranges(expected_port: str,
@@ -34,11 +33,10 @@ def check_port_in_destination_port_ranges(expected_port: str,
     i.e. check if port 8080 is in port ranges of 22,80,8080-8090,443
     """
 
-    for dest_port_range in dest_port_ranges:
-        if check_port_in_port_range(expected_port, dest_port_range) is True:
-            return True
-
-    return False
+    return any(
+        check_port_in_port_range(expected_port, dest_port_range) is True
+        for dest_port_range in dest_port_ranges
+    )
 
 
 def check_ports_in_destination_port_ranges(expected_ports: list,
@@ -49,12 +47,11 @@ def check_ports_in_destination_port_ranges(expected_ports: list,
     i.e. check if port 8080,8081 are in port ranges of 22,80,8080-8090,443
     """
 
-    for expected_port in expected_ports:
-        if check_port_in_destination_port_ranges(
-           expected_port, dest_port_ranges) is False:
-            return False
-
-    return True
+    return all(
+        check_port_in_destination_port_ranges(expected_port, dest_port_ranges)
+        is not False
+        for expected_port in expected_ports
+    )
 
 
 def check_source_address_prefix(source_address_prefix: str):
@@ -63,11 +60,10 @@ def check_source_address_prefix(source_address_prefix: str):
     required_prefix = 'BatchNodeManagement'
     default_prefix = 'default'
 
-    if source_address_prefix.lower() == required_prefix.lower() or \
-       source_address_prefix.lower() == default_prefix.lower():
-        return True
-
-    return False
+    return source_address_prefix.lower() in [
+        required_prefix.lower(),
+        default_prefix.lower(),
+    ]
 
 
 def check_protocol(protocol: str):
@@ -76,11 +72,10 @@ def check_protocol(protocol: str):
     required_protocol = 'Tcp'
     any_protocol = 'Any'
 
-    if required_protocol.lower() == protocol.lower() or \
-       any_protocol.lower() == protocol.lower():
-        return True
-
-    return False
+    return (
+        required_protocol.lower() == protocol.lower()
+        or any_protocol.lower() == protocol.lower()
+    )
 
 
 def check_direction(direction: str):
@@ -88,10 +83,7 @@ def check_direction(direction: str):
 
     required_direction = 'Inbound'
 
-    if required_direction.lower() == direction.lower():
-        return True
-
-    return False
+    return required_direction.lower() == direction.lower()
 
 
 def check_provisioning_state(provisioning_state: str):
@@ -99,10 +91,7 @@ def check_provisioning_state(provisioning_state: str):
 
     required_provisioning_state = 'Succeeded'
 
-    if required_provisioning_state.lower() == provisioning_state.lower():
-        return True
-
-    return False
+    return required_provisioning_state.lower() == provisioning_state.lower()
 
 
 def check_rule_for_Azure_ML(rule):
@@ -122,17 +111,16 @@ def check_rule_for_Azure_ML(rule):
     if check_provisioning_state(rule.provisioning_state) is False:
         return False
 
-    if rule.destination_port_range is not None:
-        if check_ports_in_destination_port_ranges(
-           required_ports,
-           [rule.destination_port_range]) is False:
-            return False
-    else:
+    if rule.destination_port_range is None:
         if check_ports_in_destination_port_ranges(
            required_ports,
            rule.destination_port_ranges) is False:
             return False
 
+    elif check_ports_in_destination_port_ranges(
+           required_ports,
+           [rule.destination_port_range]) is False:
+        return False
     return True
 
 
@@ -182,27 +170,30 @@ def check_vnet_security_rules(auth_object,
 
             rule_matched = None
             for rule in security_rules:
-                rule_info = []
-                # add vnet details
-                rule_info.append(vnet_name)
-                rule_info.append(vnet_subscription_id)
-                rule_info.append(vnet_resource_group)
-                rule_info.append(vnet_location)
-                # add subnet details
-                rule_info.append(subnet.id.split("/")[-1])
+                rule_info = [
+                    vnet_name,
+                    vnet_subscription_id,
+                    vnet_resource_group,
+                    vnet_location,
+                    subnet.id.split("/")[-1],
+                ]
+
                 rule_info.append(network_security_group_name)
                 rule_info.append(network_security_group_subscription_id)
-                rule_info.append(network_security_group_resource_group_name)
-                # add rule details
-                rule_info.append(rule.priority)
-                rule_info.append(rule.name)
-                rule_info.append(rule.source_address_prefix)
+                rule_info.extend(
+                    (
+                        network_security_group_resource_group_name,
+                        rule.priority,
+                        rule.name,
+                        rule.source_address_prefix,
+                    )
+                )
+
                 if rule.destination_port_range is not None:
                     rule_info.append(rule.destination_port_range)
                 else:
                     rule_info.append(rule.destination_port_ranges)
-                rule_info.append(rule.direction)
-                rule_info.append(rule.provisioning_state)
+                rule_info.extend((rule.direction, rule.provisioning_state))
                 vnet_info.append(rule_info)
 
                 if check_rule_for_Azure_ML(rule) is True:
@@ -216,7 +207,7 @@ def check_vnet_security_rules(auth_object,
                       subnet.id.split("/")[-1])
 
     if save_to_file is True:
-        file_name = vnet_name + ".csv"
+        file_name = f"{vnet_name}.csv"
         with open(file_name, mode='w') as vnet_rule_file:
             vnet_rule_file_writer = csv.writer(
                 vnet_rule_file,

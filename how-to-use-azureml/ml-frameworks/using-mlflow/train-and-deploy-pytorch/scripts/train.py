@@ -135,11 +135,12 @@ def driver():
     pytorch_index = "https://download.pytorch.org/whl/"
     pytorch_version = "cpu/torch-1.1.0-cp36-cp36m-linux_x86_64.whl"
     deps = [
-        "cloudpickle=={}".format(cloudpickle.__version__),
+        f"cloudpickle=={cloudpickle.__version__}",
         pytorch_index + pytorch_version,
-        "torchvision=={}".format(torchvision.__version__),
-        "Pillow=={}".format("6.0.0")
+        f"torchvision=={torchvision.__version__}",
+        'Pillow==6.0.0',
     ]
+
     with mlflow.start_run() as run:
         model = Net().to(device)
         optimizer = optim.SGD(

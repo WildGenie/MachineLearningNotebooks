@@ -82,10 +82,9 @@ with tf.Session() as sess:
         checkpoint_file_path = tf.train.latest_checkpoint(previous_model_location)
         saver.restore(sess, checkpoint_file_path)
         checkpoint_filename = os.path.basename(checkpoint_file_path)
-        num_found = re.search(r'\d+', checkpoint_filename)
-        if num_found:
-            start_epoch = int(num_found.group(0))
-            print("Resuming from epoch {}".format(str(start_epoch)))
+        if num_found := re.search(r'\d+', checkpoint_filename):
+            start_epoch = int(num_found[0])
+            print(f"Resuming from epoch {start_epoch}")
     else:
         init.run()
 

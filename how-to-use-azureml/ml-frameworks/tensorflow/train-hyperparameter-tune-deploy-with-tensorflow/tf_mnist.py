@@ -130,13 +130,14 @@ if previous_model_location:
     checkpoint_file_path = tf.train.latest_checkpoint(previous_model_location)
     checkpoint.restore(checkpoint_file_path)
     checkpoint_filename = os.path.basename(checkpoint_file_path)
-    num_found = re.search(r'\d+', checkpoint_filename)
-    if num_found:
-        start_epoch = int(num_found.group(0))
-        print("Resuming from epoch {}".format(str(start_epoch)))
+    if num_found := re.search(r'\d+', checkpoint_filename):
+        start_epoch = int(num_found[0])
+        print(f"Resuming from epoch {start_epoch}")
 
 start_time = time.perf_counter()
-for epoch in range(0, n_epochs):
+# Save checkpoints in the "./outputs" folder so that they are automatically uploaded into run history.
+checkpoint_dir = './outputs/'
+for epoch in range(n_epochs):
 
     # randomly shuffle training set
     indices = np.random.permutation(training_set_size)
@@ -170,8 +171,6 @@ for epoch in range(0, n_epochs):
     run.log('validation_acc', np.float(acc_val))
     print(epoch, '-- Training accuracy:', acc_train, '\b Validation accuracy:', acc_val)
 
-    # Save checkpoints in the "./outputs" folder so that they are automatically uploaded into run history.
-    checkpoint_dir = './outputs/'
     checkpoint = tf.train.Checkpoint(model=neural_net, optimizer=optimizer)
 
     if epoch % 2 == 0:
@@ -187,4 +186,4 @@ tf.saved_model.save(neural_net, './outputs/model/')
 
 stop_time = time.perf_counter()
 training_time = (stop_time - start_time) * 1000
-print("Total time in milliseconds for training: {}".format(str(training_time)))
+print(f"Total time in milliseconds for training: {str(training_time)}")

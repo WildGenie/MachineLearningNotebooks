@@ -9,9 +9,9 @@ parser.add_argument("--model_path")
 parser.add_argument("--ds_name")
 args = parser.parse_args()
 
-print("Argument 1(model_name): %s" % args.model_name)
-print("Argument 2(model_path): %s" % args.model_path)
-print("Argument 3(ds_name): %s" % args.ds_name)
+print(f"Argument 1(model_name): {args.model_name}")
+print(f"Argument 2(model_path): {args.model_path}")
+print(f"Argument 3(ds_name): {args.ds_name}")
 
 run = Run.get_context()
 ws = None

@@ -7,8 +7,8 @@ from sklearn.model_selection import train_test_split
 
 def write_output(df, path):
     os.makedirs(path, exist_ok=True)
-    print("%s created" % path)
-    df.to_parquet(path + "/processed.parquet")
+    print(f"{path} created")
+    df.to_parquet(f"{path}/processed.parquet")
 
 
 print("Split the data into train and test")
@@ -22,8 +22,11 @@ parser.add_argument("--output_split_test", type=str, help="output split test dat
 
 args = parser.parse_args()
 
-print("Argument 1(output training data split path): %s" % args.output_split_train)
-print("Argument 2(output test data split path): %s" % args.output_split_test)
+print(
+    f"Argument 1(output training data split path): {args.output_split_train}"
+)
+
+print(f"Argument 2(output test data split path): {args.output_split_test}")
 
 # These functions splits the input features and labels into test and train data
 # Visit https://docs.microsoft.com/en-us/azure/machine-learning/service/tutorial-auto-train-models for more detail
@@ -32,7 +35,6 @@ output_split_train, output_split_test = train_test_split(transformed_df, test_si
 output_split_train.reset_index(inplace=True, drop=True)
 output_split_test.reset_index(inplace=True, drop=True)
 
-if not (args.output_split_train
-        is None and args.output_split_test is None):
+if args.output_split_train is not None or args.output_split_test is not None:
     write_output(output_split_train, args.output_split_train)
     write_output(output_split_test, args.output_split_test)

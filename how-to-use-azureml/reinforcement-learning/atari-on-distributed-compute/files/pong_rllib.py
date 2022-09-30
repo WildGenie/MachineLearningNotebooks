@@ -8,8 +8,7 @@ from utils import callbacks
 if __name__ == "__main__":
 
     ray_on_aml = Ray_On_AML()
-    ray = ray_on_aml.getRay()
-    if ray:  # in the headnode
+    if ray := ray_on_aml.getRay():
         # Parse arguments
         train_parser = train.create_parser()
 

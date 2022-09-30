@@ -24,12 +24,9 @@ num_channel = 3
 
 
 def get_class_label_dict(labels_dir):
-    label = []
     labels_path = os.path.join(labels_dir, 'labels.txt')
     proto_as_ascii_lines = tf.gfile.GFile(labels_path).readlines()
-    for temp in proto_as_ascii_lines:
-        label.append(temp.rstrip())
-    return label
+    return [temp.rstrip() for temp in proto_as_ascii_lines]
 
 
 def init():
@@ -80,5 +77,5 @@ def run(mini_batch):
         test_image = file_to_tensor(file_path)
         out = g_tf_sess.run(test_image)
         result = g_tf_sess.run(probabilities, feed_dict={input_images: [out]})
-        result_list.append(os.path.basename(file_path) + ": " + label_dict[result[0]])
+        result_list.append(f"{os.path.basename(file_path)}: {label_dict[result[0]]}")
     return result_list

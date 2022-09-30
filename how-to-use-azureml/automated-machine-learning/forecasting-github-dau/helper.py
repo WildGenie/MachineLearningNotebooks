@@ -101,8 +101,9 @@ def run_inference(
         model_location = train_run.properties["model_data_location"]
         _, model_base_name = model_location.rsplit("/", 1)
     train_run.download_file(
-        "outputs/{}".format(model_base_name), "inference/{}".format(model_base_name)
+        f"outputs/{model_base_name}", f"inference/{model_base_name}"
     )
+
 
     inference_env = train_run.get_environment()
 

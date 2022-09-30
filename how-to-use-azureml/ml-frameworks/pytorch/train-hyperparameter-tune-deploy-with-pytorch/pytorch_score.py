@@ -31,5 +31,4 @@ def run(input_data):
         pred_probs = softmax(output).numpy()[0]
         index = torch.argmax(output, 1)
 
-    result = {"label": classes[index], "probability": str(pred_probs[index])}
-    return result
+    return {"label": classes[index], "probability": str(pred_probs[index])}

@@ -66,7 +66,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs, data_dir):
     best_acc = 0.0
 
     for epoch in range(num_epochs):
-        print('Epoch {}/{}'.format(epoch, num_epochs - 1))
+        print(f'Epoch {epoch}/{num_epochs - 1}')
         print('-' * 10)
 
         # Each epoch has a training and validation phase
@@ -154,10 +154,14 @@ def fine_tune_model(num_epochs, data_dir, learning_rate, momentum):
     exp_lr_scheduler = lr_scheduler.StepLR(
         optimizer_ft, step_size=7, gamma=0.1)
 
-    model = train_model(model_ft, criterion, optimizer_ft,
-                        exp_lr_scheduler, num_epochs, data_dir)
-
-    return model
+    return train_model(
+        model_ft,
+        criterion,
+        optimizer_ft,
+        exp_lr_scheduler,
+        num_epochs,
+        data_dir,
+    )
 
 
 def download_data():
@@ -195,7 +199,7 @@ def main():
     args = parser.parse_args()
 
     data_dir = download_data()
-    print("data directory is: " + data_dir)
+    print(f"data directory is: {data_dir}")
     model = fine_tune_model(args.num_epochs, data_dir,
                             args.learning_rate, args.momentum)
     os.makedirs(args.output_dir, exist_ok=True)

@@ -10,8 +10,8 @@ print("Hello Azure ML!")
 mounted_input_path = sys.argv[1]
 mounted_output_path = sys.argv[2]
 
-print("Argument 1: %s" % mounted_input_path)
-print("Argument 2: %s" % mounted_output_path)
+print(f"Argument 1: {mounted_input_path}")
+print(f"Argument 2: {mounted_output_path}")
 
 with open(mounted_input_path, 'r') as f:
     content = f.read()

@@ -17,7 +17,7 @@ parser.add_argument("--output_normalize", type=str, help="replaced undefined val
 
 args = parser.parse_args()
 
-print("Argument (output normalized taxi data path): %s" % args.output_normalize)
+print(f"Argument (output normalized taxi data path): {args.output_normalize}")
 
 # These functions replace undefined values and rename to use meaningful names.
 replaced_stfor_vals_df = (combined_converted_df.replace({"store_forward": "0"}, {"store_forward": "N"})
@@ -49,8 +49,8 @@ del normalized_df["dropoff_datetime"]
 
 normalized_df.reset_index(inplace=True, drop=True)
 
-if not (args.output_normalize is None):
+if args.output_normalize is not None:
     os.makedirs(args.output_normalize, exist_ok=True)
-    print("%s created" % args.output_normalize)
+    print(f"{args.output_normalize} created")
     path = args.output_normalize + "/processed.parquet"
     write_df = normalized_df.to_parquet(path)

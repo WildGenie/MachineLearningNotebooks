@@ -10,15 +10,14 @@ from azureml.train.automl.run import AutoMLRun
 
 
 def get_best_automl_run(pipeline_run):
-    all_children = [c for c in pipeline_run.get_children()]
+    all_children = list(pipeline_run.get_children())
     automl_step = [
         c for c in all_children if c.properties.get("runTemplate") == "AutoML"
     ]
     for c in all_children:
         print(c, c.properties)
     automlrun = AutoMLRun(pipeline_run.experiment, automl_step[0].id)
-    best = automlrun.get_best_child()
-    return best
+    return automlrun.get_best_child()
 
 
 def get_model_path(model_artifact_path):
@@ -32,9 +31,9 @@ if __name__ == "__main__":
     parser.add_argument("--ds_name")
     args = parser.parse_args()
 
-    print("Argument 1(model_name): %s" % args.model_name)
-    print("Argument 2(model_path): %s" % args.model_path)
-    print("Argument 3(ds_name): %s" % args.ds_name)
+    print(f"Argument 1(model_name): {args.model_name}")
+    print(f"Argument 2(model_path): {args.model_path}")
+    print(f"Argument 3(ds_name): {args.ds_name}")
 
     run = Run.get_context()
     ws = None
